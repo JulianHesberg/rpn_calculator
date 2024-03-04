@@ -11,6 +11,7 @@ class _NumberDisplayState extends State<NumberDisplay> {
   final Calculator calculator = Calculator([]);
   String _inputController = "";
   num input = 0;
+  String _stackController = "";
 
   @override
   Widget build(BuildContext context) {
@@ -32,31 +33,12 @@ class _NumberDisplayState extends State<NumberDisplay> {
     return SizedBox(
         height: 100,
         child: Center(
-          child: Wrap(
-            children: [
-              if(calculator.stack.length <10)
-              for (final number in calculator.stack)
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Text(
-                    number.toString(),
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    maxLines: 2,
-                    key: const Key("Stack_Text"),
-                  ),
-                ),
-              if(calculator.stack.length >= 10)
-                for(int i = calculator.stack.length -10; i < calculator.stack.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Text(
-                      calculator.stack[i].toString(),
-                      style: Theme.of(context).textTheme.headlineSmall,
-                      maxLines: 2,
-                      key: const Key("Stack_Text"),
-                    ),
-                  ),
-            ],
+          child: Text(
+            //TODO MAKE THIS A SINGLE TEXT USING INTERPOLATION!!!!!!
+              _stackController,
+              style: Theme.of(context).textTheme.headlineSmall,
+              maxLines: 2,
+              key:  Key("Stack_Text"),
           ),
         ));
   }
@@ -141,15 +123,19 @@ class _NumberDisplayState extends State<NumberDisplay> {
       switch (operator) {
         case '+':
           calculator.execute(AddCommand());
+          updateStackText();
           break;
         case '-':
           calculator.execute(SubtractCommand());
+          updateStackText();
           break;
         case '*':
           calculator.execute(MultiplyCommand());
+          updateStackText();
           break;
         case '/':
           calculator.execute(DivideCommand());
+          updateStackText();
           break;
         default:
           print('Invalid operator');
@@ -162,8 +148,20 @@ class _NumberDisplayState extends State<NumberDisplay> {
     setState(() {
       final num numInput = input;
       calculator.stack.add(numInput);
+      updateStackText();
       clearInput();
     });
+  }
+
+  updateStackText(){
+    final List<num> numbers = calculator.stack;
+    final int maxNumbers = 10;
+    final int startIndex = numbers.length > maxNumbers ? numbers.length - maxNumbers : 0;
+    final List<num> lastNumbers = numbers.sublist(startIndex);
+
+    final String commaSeparatedNumbers = lastNumbers.join(', ');
+
+    _stackController = commaSeparatedNumbers;
   }
 
   clearInput() {
@@ -176,6 +174,7 @@ class _NumberDisplayState extends State<NumberDisplay> {
   clearStack() {
     setState(() {
       calculator.stack = [];
+      updateStackText();
     });
   }
 
